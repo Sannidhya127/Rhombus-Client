@@ -36,12 +36,9 @@ def isUserAdmin():
 
             return False
     elif os.name == 'posix':
-        logging.info("Checked root for Posix.")
-
         # Check for root on Posix
         return os.getpid() == 0
     else:
-        logging.error("Unsupported orperating system for the module")
         raise RuntimeError(
             "Unsupported operating system for this module: %s" % (os.name,))
 
