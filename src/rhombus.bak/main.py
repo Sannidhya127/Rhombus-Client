@@ -16,9 +16,12 @@ import enum
 import win32api
 import win32con
 import win32event
+import re
 import win32process
 from win32com.shell.shell import ShellExecuteEx
 from win32com.shell import shellcon
+
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
 
 def isUserAdmin():
@@ -164,15 +167,18 @@ def CheckLogin():
         print("You are not logged in, please log in to continue")
         username = input("Username: ")
         email = input('Email: ')
-        jsonData = {
-            'username' : username,
-            'email' : email
-        }
-        json_object = json.dumps(jsonData, indent = 4)
-        with open(pathPy, "w") as outfile:
-            outfile.write(json_object)
-        print(f"User Logged in successfully {username}[USERNAME] {email}[EMAIL]")
-
+        if(re.fullmatch(regex, email)):
+            jsonData = {
+                'username' : username,
+                'email' : email
+            }
+            json_object = json.dumps(jsonData, indent = 4)
+            with open(pathPy, "w") as outfile:
+                outfile.write(json_object)
+            print(f"User Logged in successfully {username}[USERNAME] {email}[EMAIL]")
+        else:
+            print("Not an email")
+            CheckLogin()
 def sendMail():
     pass
 
