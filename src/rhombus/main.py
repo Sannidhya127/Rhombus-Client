@@ -1,5 +1,7 @@
+from email.mime import application
 import smtplib
 from email.message import EmailMessage
+from wsgiref.util import application_uri
 from colored import fg, bg, attr
 import os
 from email.parser import BytesParser, Parser
@@ -23,17 +25,8 @@ from win32com.shell import shellcon
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
-EMAIL_PASS = "cppxerwnmigxogbo"
 
-uName = getpass.getuser()
 
-#defining the file path and name
-pathPy = "C:/Users/"+uName+"/rhombus.json"
-
-with open(pathPy) as f:
-    data = json.load(f)
-    global email_adress
-    email_adress = data['email']
 
 def isUserAdmin():
 
@@ -179,10 +172,12 @@ def CheckLogin():
         username = input("Username: ")
         global email
         email = input('Email: ')
+        application_password = input("Application Password (should be linked with the Email entered): ")
         if(re.fullmatch(regex, email)):
             jsonData = {
                 'username' : username,
-                'email' : email
+                'email' : email,
+                'app_pass' : application_password
             }
             json_object = json.dumps(jsonData, indent = 4)
             with open(pathPy, "w") as outfile:
@@ -191,7 +186,27 @@ def CheckLogin():
         else:
             print("Not an email")
             CheckLogin()
+
+def checkEntry():
+    uName = getpass.getuser()
+
+    #defining the file path and name
+    pathPy = "C:/Users/"+uName+"/rhombus.json"
+
+    path = os.path.exists(pathPy)
+    if path == True:
+        with open(pathPy) as f:
+            data = json.load(f)
+            global email_adress
+            email_adress = data['email']
+            global application_password
+            application_password = data['app_pass']
+    else:
+        pass
+
+
 def sendMail():
+    checkEntry()
     recipent = input("Recipent email: ")
     subject = input("Subject: ")
     body = input("body: ")
@@ -202,7 +217,7 @@ def sendMail():
     msg.set_content(body)
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-        smtp.login(email_adress, EMAIL_PASS)
+        smtp.login(email_adress, application_password)
         smtp.send_message(msg)
 
 

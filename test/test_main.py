@@ -1,1 +1,5 @@
-from rhombus import CheckLogin, sendMail
+import src.rhombus
+from src.rhombus import CheckLogin, sendMail
+
+
+rhombus.sendMail()
