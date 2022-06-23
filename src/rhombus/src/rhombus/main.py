@@ -16,10 +16,14 @@ import enum
 import win32api
 import win32con
 import win32event
+import re
 import win32process
 from win32com.shell.shell import ShellExecuteEx
 from win32com.shell import shellcon
 
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
+EMAIL_PASS = os.environ.get('rhombus_app_pass')
 
 def isUserAdmin():
 
@@ -163,18 +167,33 @@ def CheckLogin():
         # file = open(pathPy, 'w')
         print("You are not logged in, please log in to continue")
         username = input("Username: ")
+        global email
         email = input('Email: ')
-        jsonData = {
-            'username' : username,
-            'email' : email
-        }
-        json_object = json.dumps(jsonData, indent = 4)
-        with open(pathPy, "w") as outfile:
-            outfile.write(json_object)
-        print(f"User Logged in successfully {username}[USERNAME] {email}[EMAIL]")
-
+        if(re.fullmatch(regex, email)):
+            jsonData = {
+                'username' : username,
+                'email' : email
+            }
+            json_object = json.dumps(jsonData, indent = 4)
+            with open(pathPy, "w") as outfile:
+                outfile.write(json_object)
+            print(f"User Logged in successfully {username}[USERNAME] {email}[EMAIL]")
+        else:
+            print("Not an email")
+            CheckLogin()
 def sendMail():
-    pass
+    recipent = input("Recipent email: ")
+    subject = input("Subject: ")
+    body = input("body: ")
+    msg = f"Subject: {subject}\n\n{body}"
+    with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.ehlo()
+
+        smtp.login(email, EMAIL_PASS)
+        smtp.sendmail(email, recipent, msg)
+
 
 
 
@@ -187,3 +206,5 @@ if __name__ == '__main__':
         command = input(f"{fg('green_1')}rhombus client cli[vAlpha]: {attr('reset')}")
         if command == "q" or command == "exit":
             exit()
+        if command == "send mail":
+            sendMail()

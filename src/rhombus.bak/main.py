@@ -23,6 +23,17 @@ from win32com.shell import shellcon
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
+EMAIL_PASS = "cppxerwnmigxogbo"
+
+uName = getpass.getuser()
+
+#defining the file path and name
+pathPy = "C:/Users/"+uName+"/rhombus.json"
+
+with open(pathPy) as f:
+    data = json.load(f)
+    global email_adress
+    email_adress = data['email']
 
 def isUserAdmin():
 
@@ -166,6 +177,7 @@ def CheckLogin():
         # file = open(pathPy, 'w')
         print("You are not logged in, please log in to continue")
         username = input("Username: ")
+        global email
         email = input('Email: ')
         if(re.fullmatch(regex, email)):
             jsonData = {
@@ -180,7 +192,18 @@ def CheckLogin():
             print("Not an email")
             CheckLogin()
 def sendMail():
-    pass
+    recipent = input("Recipent email: ")
+    subject = input("Subject: ")
+    body = input("body: ")
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = email_adress
+    msg['To'] = recipent
+    msg.set_content(body)
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        smtp.login(email_adress, EMAIL_PASS)
+        smtp.send_message(msg)
 
 
 
@@ -193,3 +216,5 @@ if __name__ == '__main__':
         command = input(f"{fg('green_1')}rhombus client cli[vAlpha]: {attr('reset')}")
         if command == "q" or command == "exit":
             exit()
+        if command == "send mail":
+            sendMail()
