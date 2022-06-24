@@ -1,3 +1,4 @@
+from ast import arg
 from email.mime import application
 import smtplib
 from email.message import EmailMessage
@@ -7,15 +8,20 @@ import os
 from email.parser import BytesParser, Parser
 from datetime import *
 from email.policy import default
+import tkinter
+import threading
+import queue
 import imghdr
 import json
 import sys, traceback, types
 import getpass
 import win32ui
+import multiprocessing
 import win32con
 import ctypes
 import enum
 import win32api
+from alive_progress import alive_bar
 import win32con
 import win32event
 import re
@@ -187,6 +193,11 @@ def CheckLogin():
             print("Not an email")
             CheckLogin()
 
+
+def loading():
+    while True:
+        print(".", end="")
+
 def checkEntry():
     uName = getpass.getuser()
 
@@ -205,23 +216,25 @@ def checkEntry():
         pass
 
 
-def sendMail():
+def sendMail(mail_data):
     checkEntry()
-    recipent = input("Recipent email: ")
-    subject = input("Subject: ")
-    body = input("body: ")
-    msg = EmailMessage()
-    msg['Subject'] = subject
-    msg['From'] = email_adress
-    msg['To'] = recipent
-    msg.set_content(body)
+    credentials = mail_data.split(" ")
+    recipent = credentials[1]
+    if len(recipent) == 0:
+        print("No email given. Use 'mail <recipent_mail_id>'")
+    else:
+        subject = input("Subject: ")
+        body = input("body: ")
+        msg = EmailMessage()
+        msg['Subject'] = subject
+        msg['From'] = email_adress
+        msg['To'] = recipent
+        msg.set_content(body)
 
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-        smtp.login(email_adress, application_password)
-        smtp.send_message(msg)
-
-
-
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login(email_adress, application_password)
+            smtp.send_message(msg)  
+            
 if __name__ == '__main__':
     bootstrap()
 
@@ -231,5 +244,5 @@ if __name__ == '__main__':
         command = input(f"{fg('green_1')}rhombus client cli[vAlpha]: {attr('reset')}")
         if command == "q" or command == "exit":
             exit()
-        if command == "send mail":
-            sendMail()
+        if command[0:4] == "mail":
+            sendMail(command)
