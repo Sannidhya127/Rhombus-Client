@@ -9,6 +9,10 @@ from email.parser import BytesParser, Parser
 from datetime import *
 from email.policy import default
 import tkinter
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 import threading
 import queue
 import imghdr
@@ -164,39 +168,39 @@ def bootstrap():
 
 
 def CheckLogin():
-    #taking the username
-    uName = getpass.getuser()
+    try:
+        #taking the username
+        uName = getpass.getuser()
 
-    #defining the file path and name
-    pathPy = "C:/Users/"+uName+"/rhombus.json"
-    path = os.path.exists(pathPy)
-    if path == True:
-        pass
-    else:
-        # file = open(pathPy, 'w')
-        print("You are not logged in, please log in to continue")
-        username = input("Username: ")
-        global email
-        email = input('Email: ')
-        application_password = input("Application Password (should be linked with the Email entered): ")
-        if(re.fullmatch(regex, email)):
-            jsonData = {
-                'username' : username,
-                'email' : email,
-                'app_pass' : application_password
-            }
-            json_object = json.dumps(jsonData, indent = 4)
-            with open(pathPy, "w") as outfile:
-                outfile.write(json_object)
-            print(f"User Logged in successfully {username}[USERNAME] {email}[EMAIL]")
+        #defining the file path and name
+        pathPy = "C:/Users/"+uName+"/rhombus.json"
+        path = os.path.exists(pathPy)
+        if path == True:
+            pass
         else:
-            print("Not an email")
-            CheckLogin()
+            # file = open(pathPy, 'w')
+            print("You are not logged in, please log in to continue")
+            username = input("Username: ")
+            global email
+            email = input('Email: ')
+            application_password = input("Application Password (should be linked with the Email entered): ")
+            if(re.fullmatch(regex, email)):
+                jsonData = {
+                    'username' : username,
+                    'email' : email,
+                    'app_pass' : application_password
+                }
+                json_object = json.dumps(jsonData, indent = 4)
+                with open(pathPy, "w") as outfile:
+                    outfile.write(json_object)
+                print(f"User Logged in successfully {username}[USERNAME] {email}[EMAIL]")
+            else:
+                print("Not an email")
+                CheckLogin()
+    except Exception as e:
+        print(f"Failed checking login with exception '{e}'")
 
 
-def loading():
-    while True:
-        print(".", end="")
 
 def checkEntry():
     uName = getpass.getuser()
@@ -217,23 +221,32 @@ def checkEntry():
 
 
 def sendMail(mail_data):
-    checkEntry()
-    credentials = mail_data.split(" ")
-    recipent = credentials[1]
-    if len(recipent) == 0:
-        print("No email given. Use 'mail <recipent_mail_id>'")
-    else:
-        subject = input("Subject: ")
-        body = input("body: ")
-        msg = EmailMessage()
-        msg['Subject'] = subject
-        msg['From'] = email_adress
-        msg['To'] = recipent
-        msg.set_content(body)
+    if mail_data[-8:]) == '--attach':
+        try:
+            pass
+        except Exception as e:
+            print(e)
 
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            smtp.login(email_adress, application_password)
-            smtp.send_message(msg)  
+    try:
+        checkEntry()
+        credentials = mail_data.split(" ")
+        recipent = credentials[1]
+        if len(recipent) == 0:
+            print("No email given. Use 'mail <recipent_mail_id>'")
+        else:
+            subject = input("Subject: ")
+            body = input("body: ")
+            msg = EmailMessage()
+            msg['Subject'] = subject
+            msg['From'] = email_adress
+            msg['To'] = recipent
+            msg.set_content(body)
+
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                smtp.login(email_adress, application_password)
+                smtp.send_message(msg)  
+    except Exception as e:
+        print(f"Failed sending mail with exception '{e}'")
             
 if __name__ == '__main__':
     bootstrap()
